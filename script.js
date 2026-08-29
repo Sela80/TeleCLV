@@ -1,5 +1,7 @@
 const API_URL = 'https://teleclv.onrender.com';
 
+let loadingTimeout;
+
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('predictionForm');
     if (form) form.addEventListener('submit', handlePrediction);
@@ -7,32 +9,63 @@ document.addEventListener('DOMContentLoaded', function() {
 
 async function handlePrediction(event) {
     event.preventDefault();
+    
     const resultContainer = document.getElementById('result');
     const resultContent = document.getElementById('resultContent');
     const spinner = document.getElementById('spinner');
+    const loadingMessage = document.getElementById('loadingMessage');
     const errorContainer = document.getElementById('error');
     const errorMessage = document.getElementById('errorMessage');
     
-    resultContainer.style.display = 'none';
-    errorContainer.style.display = 'none';
-    spinner.classList.add('active');
+    // Reset display
     resultContainer.style.display = 'block';
+    errorContainer.style.display = 'none';
+    resultContent.style.display = 'none';
+    spinner.style.display = 'block';
+    loadingMessage.style.display = 'block';
+    loadingMessage.textContent = 'Connexion au serveur...';
+    
+    // Message après 5 secondes
+    loadingTimeout = setTimeout(() => {
+        loadingMessage.textContent = 'Le serveur démarre, encore quelques secondes...';
+    }, 5000);
     
     try {
         const formData = collectFormData();
+        
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 60000); // Timeout 60s
+        
         const response = await fetch(`${API_URL}/predict`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData)
+            body: JSON.stringify(formData),
+            signal: controller.signal
         });
         
-        if (!response.ok) throw new Error(`Erreur serveur : ${response.status}`);
+        clearTimeout(timeoutId);
+        clearTimeout(loadingTimeout);
+        
+        if (!response.ok) {
+            throw new Error(`Erreur serveur : ${response.status}`);
+        }
+        
         const data = await response.json();
         displayResult(data);
+        
     } catch (error) {
-        displayError(error.message);
+        clearTimeout(loadingTimeout);
+        
+        if (error.name === 'AbortError') {
+            displayError('Le service met du temps à répondre. Le serveur est peut-être en veille. Réessayez dans quelques secondes.');
+        } else if (error.message.includes('Failed to fetch')) {
+            displayError('Impossible de joindre le serveur. Vérifiez votre connexion internet ou réessayez plus tard.');
+        } else {
+            displayError(`Une erreur est survenue : ${error.message}. Réessayez dans quelques secondes.`);
+        }
     } finally {
-        spinner.classList.remove('active');
+        spinner.style.display = 'none';
+        loadingMessage.style.display = 'none';
     }
 }
 
@@ -73,6 +106,6 @@ function displayError(message) {
     const errorContainer = document.getElementById('error');
     const errorMessage = document.getElementById('errorMessage');
     resultContainer.style.display = 'none';
-    errorMessage.textContent = `Une erreur est survenue : ${message}. Veuillez réessayer.`;
+    errorMessage.textContent = message;
     errorContainer.style.display = 'block';
 }
