@@ -7,4 +7,3 @@ env/
 venv/
 ENV/
 .DS_Store
-model_CatBoost_R.cbm
