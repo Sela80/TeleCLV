@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeleCLV — Estimation de la valeur client télécom</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='4' fill='%23B33D2C'/><path d='M4 11 L7 8 L9 10 L12 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/><circle cx='12' cy='5' r='1.5' fill='white'/></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">TeleCLV</div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Accueil</a></li>
+                <li><a href="prediction.html" class="nav-link active">Prédiction</a></li>
+                <li><a href="methodologie.html" class="nav-link">Méthodologie</a></li>
+                <li><a href="https://github.com/Sela80/Data-Science-/blob/main/Taux_de_d%C3%A9sabonnement_des_clients_des_op%C3%A9rateurs_t%C3%A9l%C3%A9coms.ipynb" target="_blank" class="nav-link">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                </a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="prediction-section">
+            <h1>Estimation de la Valeur Client</h1>
+            <p class="section-intro">Renseignez le profil du client pour obtenir une estimation de sa valeur potentielle.</p>
+
+            <form id="predictionForm" class="prediction-form">
+                <div class="form-section">
+                    <h2>Informations démographiques</h2>
+                    <div class="form-group">
+                        <label for="gender">Genre</label>
+                        <select id="gender" name="gender" required><option value="Female">Female</option><option value="Male">Male</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Senior (65+)</label>
+                        <div class="toggle-group">
+                            <label class="toggle"><input type="radio" name="SeniorCitizen" value="0" checked><span>Non</span></label>
+                            <label class="toggle"><input type="radio" name="SeniorCitizen" value="1"><span>Oui</span></label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Partenaire</label>
+                        <div class="toggle-group">
+                            <label class="toggle"><input type="radio" name="Partner" value="No" checked><span>Non</span></label>
+                            <label class="toggle"><input type="radio" name="Partner" value="Yes"><span>Oui</span></label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Personnes à charge</label>
+                        <div class="toggle-group">
+                            <label class="toggle"><input type="radio" name="Dependents" value="No" checked><span>Non</span></label>
+                            <label class="toggle"><input type="radio" name="Dependents" value="Yes"><span>Oui</span></label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Services téléphoniques</h2>
+                    <div class="form-group">
+                        <label>Service téléphonique</label>
+                        <div class="toggle-group">
+                            <label class="toggle"><input type="radio" name="PhoneService" value="No" checked><span>Non</span></label>
+                            <label class="toggle"><input type="radio" name="PhoneService" value="Yes"><span>Oui</span></label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="MultipleLines">Lignes multiples</label>
+                        <select id="MultipleLines" name="MultipleLines" required><option value="No">No</option><option value="Yes">Yes</option><option value="No phone service">No phone service</option></select>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Services internet</h2>
+                    <div class="form-group">
+                        <label for="InternetService">Type d'internet</label>
+                        <select id="InternetService" name="InternetService" required><option value="DSL">DSL</option><option value="Fiber optic">Fiber optic</option><option value="No">No</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="OnlineSecurity">Sécurité en ligne</label>
+                        <select id="OnlineSecurity" name="OnlineSecurity" required><option value="No">No</option><option value="Yes">Yes</option><option value="No internet service">No internet service</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="OnlineBackup">Sauvegarde en ligne</label>
+                        <select id="OnlineBackup" name="OnlineBackup" required><option value="No">No</option><option value="Yes">Yes</option><option value="No internet service">No internet service</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="DeviceProtection">Protection appareil</label>
+                        <select id="DeviceProtection" name="DeviceProtection" required><option value="No">No</option><option value="Yes">Yes</option><option value="No internet service">No internet service</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="TechSupport">Support technique</label>
+                        <select id="TechSupport" name="TechSupport" required><option value="No">No</option><option value="Yes">Yes</option><option value="No internet service">No internet service</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="StreamingTV">Streaming TV</label>
+                        <select id="StreamingTV" name="StreamingTV" required><option value="No">No</option><option value="Yes">Yes</option><option value="No internet service">No internet service</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label for="StreamingMovies">Streaming Films</label>
+                        <select id="StreamingMovies" name="StreamingMovies" required><option value="No">No</option><option value="Yes">Yes</option><option value="No internet service">No internet service</option></select>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h2>Contrat et paiement</h2>
+                    <div class="form-group">
+                        <label for="Contract">Type de contrat</label>
+                        <select id="Contract" name="Contract" required><option value="Month-to-month">Month-to-month</option><option value="One year">One year</option><option value="Two year">Two year</option></select>
+                    </div>
+                    <div class="form-group">
+                        <label>Facturation sans papier</label>
+                        <div class="toggle-group">
+                            <label class="toggle"><input type="radio" name="PaperlessBilling" value="No" checked><span>Non</span></label>
+                            <label class="toggle"><input type="radio" name="PaperlessBilling" value="Yes"><span>Oui</span></label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="PaymentMethod">Méthode de paiement</label>
+                        <select id="PaymentMethod" name="PaymentMethod" required><option value="Electronic check">Electronic check</option><option value="Mailed check">Mailed check</option><option value="Bank transfer (automatic)">Bank transfer (automatic)</option><option value="Credit card (automatic)">Credit card (automatic)</option></select>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-primary btn-large">Estimer la valeur du client</button>
+            </form>
+
+            <div id="result" class="result-container" style="display: none;">
+                <div class="spinner" id="spinner"></div>
+                <div id="resultContent" style="display: none;">
+                    <h2>Valeur potentielle estimée du client</h2>
+                    <div class="clv-value" id="clvValue"></div>
+                    <p class="clv-disclaimer">Cette estimation reflète la valeur générée par des clients au profil comparable dans les données historiques. Elle sert d'indicateur prédictif de potentiel, pas un calcul direct sur ce client.</p>
+                </div>
+            </div>
+
+            <div id="error" class="error-container" style="display: none;">
+                <p id="errorMessage"></p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container"><p>Projet académique - Licence 3 Développement d'Applications - UVCI 2026</p></div>
+    </footer>
+    <script src="script.js"></script>
+</body>
+</html>

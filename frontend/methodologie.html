@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TeleCLV — Estimation de la valeur client télécom</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='4' fill='%23B33D2C'/><path d='M4 11 L7 8 L9 10 L12 5' stroke='white' stroke-width='2' stroke-linecap='round' stroke-linejoin='round' fill='none'/><circle cx='12' cy='5' r='1.5' fill='white'/></svg>">
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="nav-brand">TeleCLV</div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="nav-link">Accueil</a></li>
+                <li><a href="prediction.html" class="nav-link">Prédiction</a></li>
+                <li><a href="methodologie.html" class="nav-link active">Méthodologie</a></li>
+                <li><a href="https://github.com/Sela80/Data-Science-/blob/main/Taux_de_d%C3%A9sabonnement_des_clients_des_op%C3%A9rateurs_t%C3%A9l%C3%A9coms.ipynb">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+                </a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <main class="container">
+        <section class="methodology-section">
+            <h1>Méthodologie</h1>
+            
+            <div class="method-card">
+                <h2>Source des données</h2>
+                <p><strong>Dataset :</strong> IBM Telco Customer Churn<br><strong>Source :</strong> Kaggle<br><strong>Taille :</strong> 7 043 clients</p>
+            </div>
+
+            <div class="method-card">
+                <h2>Variable cible : CLV</h2>
+                <p>Le Customer Lifetime Value (CLV) est calculé selon la formule :</p>
+                <div class="formula">CLV = MonthlyCharges × tenure</div>
+                <p class="note"><strong>Note :</strong> Il s'agit d'un proxy construit et non d'une variable native du dataset. Cette formule représente la valeur totale historique générée par le client.</p>
+            </div>
+
+            <div class="method-card">
+                <h2>Modèle utilisé</h2>
+                <p><strong>Algorithme :</strong> CatBoost Regressor<br><strong>Variables prédictives :</strong> 16 features (profil de services uniquement)</p>
+                <div class="method-note">Le modèle prédit la valeur potentielle à partir du profil de services du client (16 variables), sans connaître sa durée d'abonnement réelle. Le type de contrat agit comme indicateur indirect de fidélité.</div>
+            </div>
+
+            <div class="method-card">
+                <h2>Performance du modèle</h2>
+                <div class="metrics-grid">
+                    <div class="metric-card"><div class="metric-value">0.81</div><div class="metric-label">R² Score</div></div>
+                    <div class="metric-card"><div class="metric-value">1016</div><div class="metric-label">RMSE (± 30)</div></div>
+                    <div class="metric-card"><div class="metric-value">709</div><div class="metric-label">MAE</div></div>
+                </div>
+                <p class="note">Métriques évaluées par validation croisée à 5 plis sur l'ensemble de test.</p>
+            </div>
+
+            <div class="method-card">
+                <h2>Importance des variables</h2>
+                <canvas id="featureImportanceChart" width="800" height="500"></canvas>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container"><p>Projet académique - Licence 3 Développement d'Applications - UVCI 2026</p></div>
+    </footer>
+
+    <!-- CDN alternatif : cdnjs au lieu de jsdelivr (qui timeout sur ton réseau) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js" crossorigin="anonymous"></script>
+    
+    <script>
+        const featureData = {
+            labels: ['Contract', 'InternetService', 'StreamingMovies', 'MultipleLines', 'OnlineBackup', 'Partner', 'OnlineSecurity', 'DeviceProtection', 'StreamingTV', 'PaymentMethod', 'PhoneService', 'TechSupport', 'SeniorCitizen', 'PaperlessBilling', 'Dependents', 'gender'],
+            values: [36.9, 14.7, 10.3, 9.5, 7.3, 3.7, 3.5, 2.9, 2.9, 2.8, 2.3, 1.7, 0.5, 0.4, 0.3, 0.3]
+        };
+
+        const featureImportanceChart = new Chart(document.getElementById('featureImportanceChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: featureData.labels,
+                datasets: [{ 
+                    label: 'Importance (%)', 
+                    data: featureData.values, 
+                    backgroundColor: '#B33D2C', 
+                    borderColor: '#B33D2C', 
+                    borderWidth: 1 
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { beginAtZero: true, title: { display: true, text: 'Importance (%)' } },
+                    y: { beginAtZero: true, title: { display: true, text: 'Variable' } }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
