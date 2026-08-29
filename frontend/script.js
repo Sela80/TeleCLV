@@ -1,4 +1,4 @@
-const API_URL = 'https://teleclv-api.onrender.com'; 
+const API_URL = 'https://teleclv.onrender.com';
 
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('predictionForm');
