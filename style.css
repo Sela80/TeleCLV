@@ -1,3 +1,263 @@
+/* =========================================
+   TELECLV - FEUILLE DE STYLE COMPLÈTE
+   ========================================= */
+
+/* Reset et variables */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+:root {
+    --charcoal: #2D2D2D;
+    --terracotta: #B33D2C;
+    --off-white: #F7F5F3;
+    --light-gray: #E5E2DE;
+    --text-secondary: #6B6B6B;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-weight: 400;
+    color: var(--charcoal);
+    background-color: var(--off-white);
+    line-height: 1.6;
+}
+
+/* Navigation */
+.navbar {
+    background-color: var(--charcoal);
+    padding: 1rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.nav-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.nav-brand {
+    color: var(--off-white);
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 2rem;
+    align-items: center;
+}
+
+.nav-link {
+    color: var(--off-white);
+    text-decoration: none;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.nav-link:hover, .nav-link.active {
+    color: var(--terracotta);
+}
+
+/* Layout */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 3rem 2rem;
+}
+
+/* Hero / Accueil */
+.hero {
+    text-align: center;
+    padding: 4rem 0;
+}
+
+.hero h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.subtitle {
+    font-size: 1.25rem;
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+.description {
+    max-width: 700px;
+    margin: 0 auto 3rem;
+    text-align: left;
+}
+
+.description p {
+    margin-bottom: 1rem;
+    line-height: 1.8;
+}
+
+/* Boutons */
+.btn-primary {
+    display: inline-block;
+    background-color: var(--terracotta);
+    color: var(--off-white);
+    padding: 0.875rem 2rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    font-size: 1rem;
+}
+
+.btn-primary:hover {
+    background-color: #9A3426;
+}
+
+.btn-large {
+    padding: 1rem 2.5rem;
+    font-size: 1.125rem;
+    width: 100%;
+    margin-top: 2rem;
+}
+
+/* Section Prédiction */
+.prediction-section {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.prediction-section h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.section-intro {
+    color: var(--text-secondary);
+    margin-bottom: 2rem;
+}
+
+/* Formulaire */
+.form-section {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border: 1px solid var(--light-gray);
+}
+
+.form-section h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: var(--terracotta);
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--light-gray);
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: inherit;
+    background-color: white;
+}
+
+.form-group select:focus {
+    outline: none;
+    border-color: var(--terracotta);
+}
+
+.toggle-group {
+    display: flex;
+    gap: 1rem;
+}
+
+.toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+}
+
+/* Résultat */
+.result-container {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    border: 2px solid var(--terracotta);
+    margin-top: 2rem;
+    text-align: center;
+}
+
+.result-container h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+
+.clv-value {
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--terracotta);
+    margin: 1.5rem 0;
+}
+
+.clv-disclaimer {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    margin-top: 1rem;
+}
+
+/* Spinner */
+.spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid var(--light-gray);
+    border-top-color: var(--terracotta);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 2rem auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* Loading message */
+.loading-message {
+    text-align: center;
+    color: var(--text-secondary);
+    font-size: 0.9375rem;
+    margin: 1rem 0;
+    font-style: italic;
+}
+
+/* Erreur */
+.error-container {
+    background-color: #FEE;
+    border: 1px solid #FCC;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin-top: 2rem;
+    color: #C33;
+}
+
 /* Cold start notice */
 .cold-start-notice {
     background-color: #FFF3CD;
@@ -22,23 +282,136 @@
     line-height: 1.6;
 }
 
-/* Loading message */
-.loading-message {
-    text-align: center;
-    color: var(--text-secondary);
-    font-size: 0.9375rem;
-    margin: 1rem 0;
-    font-style: italic;
+/* Méthodologie */
+.methodology-section {
+    max-width: 900px;
+    margin: 0 auto;
 }
 
-/* Chart container */
+.methodology-section h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+}
+
+.method-card {
+    background-color: white;
+    padding: 2rem;
+    border-radius: 8px;
+    margin-bottom: 2rem;
+    border: 1px solid var(--light-gray);
+}
+
+.method-card h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: var(--terracotta);
+}
+
+.method-card p {
+    margin-bottom: 1rem;
+    line-height: 1.8;
+}
+
+.formula {
+    background-color: var(--off-white);
+    padding: 1rem;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    text-align: center;
+    margin: 1rem 0;
+    font-size: 1.125rem;
+}
+
+.note {
+    background-color: #FFF8E1;
+    padding: 1rem;
+    border-left: 4px solid #FFB300;
+    border-radius: 4px;
+    font-size: 0.9375rem;
+}
+
+.method-note {
+    background-color: var(--off-white);
+    padding: 1rem;
+    border-radius: 6px;
+    margin-top: 1rem;
+}
+
+/* Metrics */
+.metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+}
+
+.metric-card {
+    background-color: var(--off-white);
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.metric-value {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: var(--terracotta);
+    margin-bottom: 0.5rem;
+}
+
+.metric-label {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Chart */
 .chart-container {
     position: relative;
     height: 500px;
     margin-top: 1.5rem;
 }
 
+/* Footer */
+.footer {
+    background-color: var(--charcoal);
+    color: var(--off-white);
+    padding: 2rem 0;
+    margin-top: 4rem;
+    text-align: center;
+}
+
+/* Responsive */
 @media (max-width: 768px) {
+    .nav-container {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .nav-menu {
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+    }
+    
+    .hero h1 {
+        font-size: 2rem;
+    }
+    
+    .container {
+        padding: 2rem 1rem;
+    }
+    
+    .form-section {
+        padding: 1.5rem;
+    }
+    
+    .metrics-grid {
+        grid-template-columns: 1fr;
+    }
+    
     .chart-container {
         height: 600px;
     }
