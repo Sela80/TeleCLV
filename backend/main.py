@@ -1,41 +1,45 @@
 """
-Backend FastAPI pour l'application TeleCLV.
-Endpoint unique POST /predict qui charge un modèle CatBoost et retourne une estimation.
+API FastAPI de TeleCLV.
+
+Expose un endpoint de prédiction permettant d'estimer la Customer Lifetime
+Value (CLV proxy) d'un profil client télécom à l'aide d'un modèle CatBoost.
 """
 
+from pathlib import Path
+
+import pandas as pd
+from catboost import CatBoostRegressor
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from catboost import CatBoostRegressor
-import pandas as pd
-import os
 
-# Initialisation de l'application
-app = FastAPI(
-    title="API TeleCLV",
-    description="API de prédiction de la valeur client télécom",
-    version="1.0.0"
-)
 
-# Configuration CORS pour permettre les appels depuis le frontend (GitHub Pages, localhost, etc.)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"], 
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_PATH = BASE_DIR / "model_CatBoost_R.cbm"
 
-# Ordre strict des colonnes. DOIT correspondre exactement à l'ordre d'entraînement du modèle.
 FEATURE_ORDER = [
-    "gender", "SeniorCitizen", "Partner", "Dependents", "PhoneService",
-    "MultipleLines", "InternetService", "OnlineSecurity", "OnlineBackup",
-    "DeviceProtection", "TechSupport", "StreamingTV", "StreamingMovies",
-    "Contract", "PaperlessBilling", "PaymentMethod"
+    "gender",
+    "SeniorCitizen",
+    "Partner",
+    "Dependents",
+    "PhoneService",
+    "MultipleLines",
+    "InternetService",
+    "OnlineSecurity",
+    "OnlineBackup",
+    "DeviceProtection",
+    "TechSupport",
+    "StreamingTV",
+    "StreamingMovies",
+    "Contract",
+    "PaperlessBilling",
+    "PaymentMethod",
 ]
 
-# Schéma de données attendu en entrée
+
 class ClientProfile(BaseModel):
+    """Profil client attendu par le modèle."""
+
     gender: str
     SeniorCitizen: int
     Partner: str
@@ -53,75 +57,104 @@ class ClientProfile(BaseModel):
     PaperlessBilling: str
     PaymentMethod: str
 
-# Configuration du modèle
-MODEL_PATH = "model_CatBoost_R.cbm"
-model = None
 
-def load_model():
-    """Charge le modèle CatBoost en mémoire au démarrage."""
-    global model
-    if not os.path.exists(MODEL_PATH):
-        raise FileNotFoundError(f"Modèle introuvable à l'emplacement : {MODEL_PATH}")
-    model = CatBoostRegressor()
-    model.load_model(MODEL_PATH)
-    print(f"Succès : Modèle chargé depuis {MODEL_PATH}")
+class PredictionResponse(BaseModel):
+    """Réponse standardisée de l'API."""
 
-# Événement de démarrage de l'application
+    clv_estime: float
+    segment: str
+
+
+app = FastAPI(
+    title="TeleCLV API",
+    description="API de prédiction de la Customer Lifetime Value (CLV proxy).",
+    version="1.1.0",
+)
+
+# Le frontend est actuellement hébergé séparément (GitHub Pages).
+# Cette configuration reste volontairement permissive pour la démonstration.
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=False,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Content-Type"],
+)
+
+model: CatBoostRegressor | None = None
+
+
+def load_model() -> CatBoostRegressor:
+    """Charge le modèle CatBoost depuis un chemin indépendant du répertoire courant."""
+    if not MODEL_PATH.exists():
+        raise FileNotFoundError(f"Modèle introuvable : {MODEL_PATH}")
+
+    loaded_model = CatBoostRegressor()
+    loaded_model.load_model(str(MODEL_PATH))
+    return loaded_model
+
+
 @app.on_event("startup")
-async def startup_event():
-    load_model()
+async def startup_event() -> None:
+    """Charge le modèle une seule fois au démarrage de l'API."""
+    global model
+    model = load_model()
+
 
 def determine_segment(clv_value: float) -> str:
-    """Catégorise la valeur estimée en segment."""
-    if clv_value < 1500: 
+    """Retourne le segment associé à la CLV estimée."""
+    if clv_value < 1500:
         return "valeur faible"
-    elif clv_value <= 3500: 
+    if clv_value <= 3500:
         return "valeur moyenne"
-    else: 
-        return "valeur élevée"
+    return "valeur élevée"
+
+
+@app.get("/", summary="État de l'API")
+async def root() -> dict[str, object]:
+    """Endpoint simple de vérification de disponibilité."""
+    return {
+        "status": "API opérationnelle",
+        "model_loaded": model is not None,
+    }
+
+
+@app.get("/health", summary="Health check")
+async def health() -> dict[str, object]:
+    """Endpoint dédié aux vérifications de santé du service."""
+    return {
+        "status": "ok" if model is not None else "degraded",
+        "model_loaded": model is not None,
+    }
+
 
 @app.post(
     "/predict",
+    response_model=PredictionResponse,
     summary="Prédire la valeur client",
-    responses={
-        500: {
-            "description": "Erreur interne du serveur : échec de la prédiction, modèle non chargé ou données invalides."
-        }
-    }
 )
-async def predict_clv(profile: ClientProfile):
-    """
-    Reçoit un profil client en JSON, retourne l'estimation de valeur et son segment.
-    """
+async def predict_clv(profile: ClientProfile) -> PredictionResponse:
+    """Reçoit un profil client et retourne sa CLV estimée et son segment."""
+    if model is None:
+        raise HTTPException(status_code=503, detail="Modèle non chargé.")
+
     try:
-        # Conversion du modèle Pydantic en dictionnaire
-        data = profile.dict()
-        
-        # Création du DataFrame avec l'ordre STRICT des colonnes
+        data = profile.model_dump()
         df = pd.DataFrame([data])[FEATURE_ORDER]
-        
-        # Inférence
+
         prediction = model.predict(df)
-        clv_estime = float(prediction[0])
-        
-        # Calcul du segment
-        segment = determine_segment(clv_estime)
-        
-        return {
-            "clv_estime": round(clv_estime, 2),
-            "segment": segment
-        }
-    
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur lors de la prédiction : {str(e)}")
+        clv_estime = max(0.0, float(prediction[0]))
 
-@app.get("/", summary="Vérification de l'état de l'API")
-async def root():
-    """Endpoint de santé pour vérifier que l'API et le modèle sont opérationnels."""
-    return {
-        "status": "API opérationnelle", 
-        "model_loaded": model is not None
-    }
+        return PredictionResponse(
+            clv_estime=round(clv_estime, 2),
+            segment=determine_segment(clv_estime),
+        )
+    except Exception as exc:
+        raise HTTPException(
+            status_code=500,
+            detail="Erreur lors de la prédiction.",
+        ) from exc
 
-# Commande de lancement local :
-# python -m uvicorn main:app --reload --host 0.0.0.0 --port 8000
+
+# Lancement local :
+# uvicorn main:app --reload --host 0.0.0.0 --port 8000
