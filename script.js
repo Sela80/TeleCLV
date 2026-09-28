@@ -2,68 +2,68 @@ const API_URL = 'https://teleclv.onrender.com';
 
 let loadingTimeout;
 
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', () => {
     const form = document.getElementById('predictionForm');
     if (form) form.addEventListener('submit', handlePrediction);
 });
 
 async function handlePrediction(event) {
     event.preventDefault();
-    
+
     const resultContainer = document.getElementById('result');
     const resultContent = document.getElementById('resultContent');
     const spinner = document.getElementById('spinner');
     const loadingMessage = document.getElementById('loadingMessage');
     const errorContainer = document.getElementById('error');
     const errorMessage = document.getElementById('errorMessage');
-    
-    // Reset display
+
     resultContainer.style.display = 'block';
     errorContainer.style.display = 'none';
     resultContent.style.display = 'none';
     spinner.style.display = 'block';
     loadingMessage.style.display = 'block';
-    loadingMessage.textContent = 'Connexion au serveur...';
-    
-    // Message après 5 secondes
+    loadingMessage.textContent = 'Connexion au service de prédiction...';
+
     loadingTimeout = setTimeout(() => {
-        loadingMessage.textContent = 'Le serveur démarre, encore quelques secondes...';
+        loadingMessage.textContent =
+            'Le service peut être en sortie de veille. Le premier appel peut prendre quelques secondes.';
     }, 5000);
-    
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 60000);
+
     try {
-        const formData = collectFormData();
-        
-        const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 60000); // Timeout 60s
-        
         const response = await fetch(`${API_URL}/predict`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(formData),
+            body: JSON.stringify(collectFormData()),
             signal: controller.signal
         });
-        
-        clearTimeout(timeoutId);
-        clearTimeout(loadingTimeout);
-        
+
         if (!response.ok) {
-            throw new Error(`Erreur serveur : ${response.status}`);
+            let detail = `Erreur HTTP ${response.status}`;
+            try {
+                const payload = await response.json();
+                if (payload.detail) detail = payload.detail;
+            } catch (_) {
+                // Réponse non JSON : conserver le message HTTP.
+            }
+            throw new Error(detail);
         }
-        
+
         const data = await response.json();
         displayResult(data);
-        
     } catch (error) {
-        clearTimeout(loadingTimeout);
-        
         if (error.name === 'AbortError') {
-            displayError('Le service met du temps à répondre. Le serveur est peut-être en veille. Réessayez dans quelques secondes.');
+            displayError('Le service met trop de temps à répondre. Réessayez dans quelques secondes.');
         } else if (error.message.includes('Failed to fetch')) {
-            displayError('Impossible de joindre le serveur. Vérifiez votre connexion internet ou réessayez plus tard.');
+            displayError('Impossible de joindre le serveur. Vérifiez votre connexion puis réessayez.');
         } else {
-            displayError(`Une erreur est survenue : ${error.message}. Réessayez dans quelques secondes.`);
+            displayError(error.message || 'Une erreur est survenue pendant la prédiction.');
         }
     } finally {
+        clearTimeout(timeoutId);
+        clearTimeout(loadingTimeout);
         spinner.style.display = 'none';
         loadingMessage.style.display = 'none';
     }
@@ -72,7 +72,7 @@ async function handlePrediction(event) {
 function collectFormData() {
     return {
         gender: document.getElementById('gender').value,
-        SeniorCitizen: parseInt(document.querySelector('input[name="SeniorCitizen"]:checked').value),
+        SeniorCitizen: Number(document.querySelector('input[name="SeniorCitizen"]:checked').value),
         Partner: document.querySelector('input[name="Partner"]:checked').value,
         Dependents: document.querySelector('input[name="Dependents"]:checked').value,
         PhoneService: document.querySelector('input[name="PhoneService"]:checked').value,
@@ -91,21 +91,28 @@ function collectFormData() {
 }
 
 function displayResult(data) {
-    const resultContent = document.getElementById('resultContent');
-    const clvValue = document.getElementById('clvValue');
-    clvValue.textContent = formatCurrency(data.clv_estime);
-    resultContent.style.display = 'block';
+    document.getElementById('clvValue').textContent = formatCurrency(data.clv_estime);
+
+    const segmentElement = document.getElementById('clvSegment');
+    segmentElement.textContent = data.segment || 'Non défini';
+
+    document.getElementById('resultContent').style.display = 'block';
 }
 
 function formatCurrency(value) {
-    return `$ ${value.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+    return new Intl.NumberFormat('en-US', {
+        style: 'currency',
+        currency: 'USD',
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+    }).format(value);
 }
 
 function displayError(message) {
     const resultContainer = document.getElementById('result');
     const errorContainer = document.getElementById('error');
-    const errorMessage = document.getElementById('errorMessage');
+
     resultContainer.style.display = 'none';
-    errorMessage.textContent = message;
+    document.getElementById('errorMessage').textContent = message;
     errorContainer.style.display = 'block';
 }
